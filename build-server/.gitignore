@@ -1,0 +1,98 @@
+# ------------------------------
+# Node.js
+# ------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# dependency directories
+.pnp
+.pnp.js
+
+# ------------------------------
+# Environment variables
+# ------------------------------
+.env
+.env.*
+!.env.example
+
+# ------------------------------
+# Logs
+# ------------------------------
+logs
+*.log
+
+# ------------------------------
+# Build outputs
+# ------------------------------
+dist/
+build/
+out/
+.next/
+coverage/
+
+# ------------------------------
+# Docker
+# ------------------------------
+.docker/
+docker-compose.override.yml
+
+# ignore docker volumes if stored locally
+docker-data/
+volumes/
+
+# ------------------------------
+# Redis
+# ------------------------------
+dump.rdb
+appendonly.aof
+
+# ------------------------------
+# OS files
+# ------------------------------
+.DS_Store
+Thumbs.db
+
+# ------------------------------
+# IDE / Editors
+# ------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ------------------------------
+# Temporary files
+# ------------------------------
+tmp/
+temp/
+*.tmp
+
+# ------------------------------
+# Testing
+# ------------------------------
+coverage/
+.nyc_output/
+
+# ------------------------------
+# Shell script artifacts
+# ------------------------------
+*.pid
+*.seed
+*.pid.lock
+
+# ------------------------------
+# AWS / Cloud
+# ------------------------------
+.aws/
+*.pem
+*.key
+
+# ------------------------------
+# Misc
+# ------------------------------
+*.local
+
+.history
