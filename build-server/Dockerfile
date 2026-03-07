@@ -12,7 +12,7 @@ COPY package*.json .
 
 RUN npm install
 
+# we gotta do chmod as without it the main.sh will not be executed as it will not have the permission
 RUN chmod +x main.sh
-# RUN chmod +x script.js
 
 ENTRYPOINT [ "/home/app/main.sh" ]

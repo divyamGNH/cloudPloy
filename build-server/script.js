@@ -1,3 +1,7 @@
+//various updates needed are can't handle TS and other kinds of project figure out why and add a solution 
+//Look into the mime return null types that might cause an error
+//Keep working 
+
 import { exec } from "node:child_process";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "node:fs";
@@ -34,6 +38,7 @@ function init(){
         console.log(data.toString());
     });
 
+    
     p.stderr.on("data", (data)=>{
         console.log(data.toString());
     });
