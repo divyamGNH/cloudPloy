@@ -1,5 +1,6 @@
 //various updates needed are can't handle TS and other kinds of project figure out why and add a solution 
 //Look into the mime return null types that might cause an error
+//add 2 seperate ID's projectid and deploymentid so that we can map different deployments and versions of code to allow handling changes in the code causing a re deployment.
 //Keep working 
 
 import { exec } from "node:child_process";
