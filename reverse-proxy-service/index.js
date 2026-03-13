@@ -1,3 +1,5 @@
+// Just migrate to AWS Cloudfront + Edge Labmda function instead of maintaining the proxy server yourself
+
 import express from "express";
 import httpProxy from "http-proxy";
 import dotenv from "dotenv";
@@ -19,9 +21,11 @@ app.use((req,res)=>{
     const host = req.headers.host; //return the link the user hit for development stage case projectID.localhost:PORT
 
     const PROJECT_ID = host.split('.')[0];
+    const DEPLOYMENT_ID = host.split('.')[1];
     console.log(PROJECT_ID);
+    console.log(DEPLOYMENT_ID);
 
-    const targetServer = `${BASE_URL}/Project:${PROJECT_ID}`;
+    const targetServer = `${BASE_URL}/Project:${PROJECT_ID}/Deployment:${DEPLOYMENT_ID}`;
     console.log(targetServer);
     proxy.web(req, res, { target : targetServer, changeOrigin : true } );
 });

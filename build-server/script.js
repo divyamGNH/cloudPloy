@@ -9,6 +9,7 @@ import fs from "node:fs";
 import path from "node:path";
 import mime from "mime-types";
 import dotenv from "dotenv";
+import axios from "axios";
 
 dotenv.config();
 
@@ -131,7 +132,30 @@ async function init() {
   console.log("Finished uploading the Directory to S3");
 }
 
-init().catch((err) => {
-  console.log("FATAL ERROR : ", err);
-  process.exit(1);
-});
+//can not directly put try catch as init is a async function
+async function main() {
+  const PROJECT_ID = process.env.PROJECT_ID;
+  const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID;
+  const Backend_URL= process.env.Backend_URL;
+  try {
+    await init();
+
+    await axios.post(`${Backend_URL}/deploymentComplete`, {
+      ProjectID: PROJECT_ID,
+      DeploymentID: DEPLOYMENT_ID,
+      status: "Success",
+    });
+
+    process.exit(0);
+  } catch (err) {
+    console.log("FATAL ERROR : ", err);
+    await axios.post(`${Backend_URL}/deploymentComplete`, {
+      ProjectID: PROJECT_ID,
+      DeploymentID: DEPLOYMENT_ID,
+      status: "Failed",
+    });
+    process.exit(1);
+  }
+}
+
+main();
