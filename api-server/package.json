@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build": "echo \"No build step required\"",
+    "lint": "echo \"Add ESLint if needed\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
