@@ -1,0 +1,22 @@
+{
+  "family": "vercel-clone",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "vercel-cluster-build-server1",
+      "image": "801795967285.dkr.ecr.ap-south-1.amazonaws.com/vercelclone:latest",
+      "essential": true,
+      "cpu": 256,
+      "memory": 512,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000
+        }
+      ]
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024"
+}

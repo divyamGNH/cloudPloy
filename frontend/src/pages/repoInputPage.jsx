@@ -7,12 +7,13 @@ export default function GithubForm() {
   const [liveUrl, setLiveUrl] = useState("");
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    //Send request to api-server PORT 5000.
-    const res = await axios.post("http://localhost:5000/deploy", {
+    //Send request to api-server live or PORT 5000.
+    const res = await axios.post(`${BACKEND_URL}/deploy`, {
       githubUrl: githubUrl,
     });
 
@@ -26,7 +27,7 @@ export default function GithubForm() {
   };
 
   async function pollForDeploymentStatus(projectID, deploymentID) {
-    const res = await axios.get("http://localhost:5000/deploymentStatus", {
+    const res = await axios.get(`${BACKEND_URL}/deploymentStatus`, {
       params: {
         ProjectID: projectID,
         DeploymentID: deploymentID,
@@ -36,7 +37,7 @@ export default function GithubForm() {
     if (res.data.status === "Success") {
       console.log("Project deployed successfully");
 
-      const url = `${BASE_URL}/${projectID}/${deploymentID}`;
+      const url = `http://${projectID}.${deploymentID}.localhost:8000`;
       // console.log(url);
       setLiveUrl(url);
 
