@@ -21,7 +21,7 @@ jobs:
               run: aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 801795967285.dkr.ecr.ap-south-1.amazonaws.com
 
             - name: Build docker image
-              run: docker build -t vercelclone .
+              run: docker build -t vercelclone ./build-server
 
             - name: Tagging the docker image
               run: docker tag vercelclone:latest 801795967285.dkr.ecr.ap-south-1.amazonaws.com/vercelclone:latest
