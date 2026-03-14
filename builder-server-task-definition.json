@@ -1,22 +1,47 @@
 {
-  "family": "vercel-clone",
-  "networkMode": "awsvpc",
-  "containerDefinitions": [
-    {
-      "name": "vercel-cluster-build-server1",
-      "image": "801795967285.dkr.ecr.ap-south-1.amazonaws.com/vercelclone:latest",
-      "essential": true,
-      "cpu": 256,
-      "memory": 512,
-      "portMappings": [
+    "family": "vercel-cluster-build-server1",
+    "containerDefinitions": [
         {
-          "containerPort": 3000,
-          "hostPort": 3000
+            "name": "Main",
+            "image": "801795967285.dkr.ecr.ap-south-1.amazonaws.com/vercelclone:latest",
+            "cpu": 1024,
+            "memoryReservation": 2048,
+            "portMappings": [
+                {
+                    "name": "main-80-tcp",
+                    "containerPort": 80,
+                    "hostPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/aws/ecs/vercel-cluster/build-server1-f8ce",
+                    "awslogs-region": "ap-south-1",
+                    "awslogs-stream-prefix": "ecs"
+                },
+                "secretOptions": []
+            },
+            "systemControls": []
         }
-      ]
-    }
-  ],
-  "requiresCompatibilities": ["FARGATE"],
-  "cpu": "512",
-  "memory": "1024"
+    ],
+    "executionRoleArn": "arn:aws:iam::801795967285:role/service-role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "volumes": [],
+    "placementConstraints": [],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "2048",
+    "runtimePlatform": {
+        "cpuArchitecture": "X86_64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "enableFaultInjection": false
 }
