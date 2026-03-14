@@ -4,6 +4,7 @@ on:
     push :
         paths :
             - build-server/**
+    workflow_dispatch:
 
 jobs:
     test: 
