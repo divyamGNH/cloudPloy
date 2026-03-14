@@ -29,6 +29,8 @@ const s3Client = new S3Client({
 
 //The bucket s3client is initialized now what we gotta do is that take the git cloned fodler and upload it to S3 bucket.
 
+const Intro = "Hi I am your personal Builder container i will put your code to the bucket !!" 
+
 function run(command, args, options) {
   return new Promise((resolve, reject) => {
     const p = execFile(command, args, options);
@@ -146,6 +148,7 @@ async function main() {
       status: "Success",
     });
 
+    console.log("Called the backend service to notify upload success");
     process.exit(0);
   } catch (err) {
     console.log("FATAL ERROR : ", err);
@@ -154,6 +157,7 @@ async function main() {
       DeploymentID: DEPLOYMENT_ID,
       status: "Failed",
     });
+    console.log("Called the backend service to notify upload failure");
     process.exit(1);
   }
 }
