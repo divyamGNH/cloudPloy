@@ -1,0 +1,6 @@
+See we need all the following variables from the user and pass them using env somewhere
+  Branch
+  Root directory
+  Build command
+  Start command
+  extra env vars if the user wants to give any specific to their project.
