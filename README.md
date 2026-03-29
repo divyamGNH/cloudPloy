@@ -15,232 +15,156 @@ CloudPloy automates the entire journey from code to production. It's designed to
 - **Live Routing** – Each deployment gets its own subdomain automatically
 - **Scalable Architecture** – Built on AWS ECS Fargate for automatic scaling
 
-## Architecture
+## How It Works
 
 ```
-┌──────────────────────────────┐
-│      Frontend (React)        │
-│  - URL Input Form            │
-│  - Status Polling            │
-└────────────┬─────────────────┘
-             │
-             ▼
-┌──────────────────────────────┐
-│   API Server (Node.js)       │
-│  - ECS Task Orchestration    │
-│  - Deployment Management     │
-└────────────┬─────────────────┘
-             │
-             ├─────────────────────────────┐
-             ▼                             ▼
-┌────────────────────────┐    ┌──────────────────────────┐
-│   Build Server         │    │ Backend Build Server     │
-│ - Git Clone            │    │ - Railpack Dockerization │
-│ - npm build            │    │ - ECR Push               │
-│ - Artifact Upload      │    │ - Image Tagging          │
-└────────────────────────┘    └──────────────────────────┘
-             │                             │
-             └──────────┬──────────────────┘
-                        ▼
-              ┌──────────────────┐
-              │   AWS ECR        │
-              │ (Image Registry) │
-              └────────┬─────────┘
-                       ▼
-              ┌──────────────────┐
-              │ Reverse Proxy    │
-              │ (Traffic Router) │
-              └────────┬─────────┘
-                       ▼
-              ┌──────────────────┐
-              │ Deployed Apps    │
-              │ (User Projects)  │
-              └──────────────────┘
+GitHub URL submitted → API processes request → Build container clones code
+→ Code is compiled → Docker image created → Image pushed to AWS registry
+→ Traffic routed to new deployment → App goes live
 ```
 
-## Technology Stack
+**Three Simple Stages:**
+1. **Build** – Clone repo, run `npm install` and `npm run build`
+2. **Containerize** – Create a Docker image and push it to AWS
+3. **Route** – Set up live traffic routing to the new deployment
 
-### Frontend
-- **React 19** - UI framework
-- **Vite 7.3** - Build tool and dev server
-- **Tailwind CSS 4.2** - Styling
-- **Axios** - HTTP client for API communication
-- **ESLint** - Code quality
+## Tech Stack
 
-### Backend Services
-- **Node.js 20** - Runtime
-- **Express.js 5** - HTTP server framework
-- **AWS SDK** - ECS task management, ECR registry, S3 artifact storage
-- **http-proxy** - Request proxying and routing
-- **Railpack** - Standardized Docker image building
-- **Docker** - Containerization
+| Layer | Technologies |
+|-------|--------------|
+| **Frontend** | React 19, Vite, Tailwind CSS |
+| **Servers** | Node.js 20, Express.js |
+| **Building** | Docker, Railpack |
+| **Cloud** | AWS ECS Fargate, AWS ECR, AWS S3 |
 
-### Infrastructure
-- **AWS ECS Fargate** - Serverless container orchestration
-- **AWS ECR** - Container image registry
-- **AWS S3** - Build artifact storage
-- **Docker** - Container runtime
-
-## Project Structure
+## Project Layout
 
 ```
-├── frontend/                 # React application
-│   ├── src/
-│   │   ├── App.jsx          # Main deployment interface
-│   │   └── pages/           # Route components
-│   ├── vite.config.js
-│   └── package.json
-├── api-server/              # Express.js orchestrator
-│   ├── index.js            # ECS task coordinator
-│   └── package.json
-├── build-server/            # First stage build container
-│   ├── script.js           # Git clone and npm build
-│   ├── Dockerfile
-│   └── package.json
-├── backend-build-server/    # Second stage Docker builder
-│   ├── script.js           # Railpack Docker image creation
-│   ├── Dockerfile
-│   └── package.json
-├── reverse-proxy-service/   # Traffic routing service
-│   ├── index.js            # HTTP proxy logic
-│   └── package.json
-└── railpacks-tester/        # Test environment for Connectly
-    └── Connectly/           # Example multi-service application
+frontend/                   # React UI – GitHub URL input & status
+api-server/                 # Main orchestrator – handles deployment requests
+build-server/              # Compiles your code (npm install/build)
+backend-build-server/      # Creates Docker images
+reverse-proxy-service/     # Routes traffic to live deployments
+railpacks-tester/          # Example test applications
 ```
 
-## Deployment Pipeline
+## Deployment Flow
 
-### Stage 1: Code Build
-1. API Server receives deployment request with GitHub URL
-2. ECS Fargate launches `build-server` container with git credentials
-3. Build Server clones repository and runs build commands
-4. Compiled artifacts uploaded to S3
+**Stage 1: Build**
+- API receives GitHub URL
+- Build container clones your repository
+- Runs `npm install` and `npm run build`
+- Saves compiled code to cloud storage (S3)
 
-### Stage 2: Containerization
-1. Backend Build Server retrieves artifacts from S3
-2. Railpack generates optimized Dockerfile
-3. Docker image built with production dependencies
-4. Image tagged and pushed to AWS ECR
+**Stage 2: Containerize**
+- Docker image is created with your compiled code
+- Image is pushed to AWS ECR (image registry)
+- Ready for deployment
 
-### Stage 3: Routing
-1. Reverse Proxy service registers deployed application
-2. Subdomain pattern (projectID.deploymentID) assigned
-3. Traffic routed to appropriate container instance
+**Stage 3: Deploy**
+- Traffic router registers your app with a live subdomain
+- Incoming requests routed to your deployment
+- App is now live on the internet
 
-## Getting Started
+## Quick Start
 
-### Prerequisites
+### Requirements
 - Node.js 20+
-- AWS account with ECS, ECR, and S3 access
 - Docker
+- AWS account (ECS, ECR, S3)
 - Git
 
-### Environment Setup
+### Environment Variables
 
-Each service requires environment variables for AWS access and deployment configuration:
+Create `.env` files in each service directory:
 
-```bash
-# API Server
+```
 AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=<your-key>
-AWS_SECRET_ACCESS_KEY=<your-secret>
-ECS_CLUSTER=<cluster-name>
-TASK_DEFINITION=<task-definition>
-
-# Build Services
-GITHUB_TOKEN=<github-personal-access-token>
-ECR_REGISTRY=<registry-url>
-AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+GITHUB_TOKEN=your_github_token
+ECR_REGISTRY=your_ecr_url
 ```
 
-### Local Development
+### Run Locally
 
 **Frontend**
 ```bash
 cd frontend
-npm install
-npm run dev
+npm install && npm run dev
 ```
 
 **API Server**
 ```bash
 cd api-server
-npm install
-npm start
+npm install && npm start
 ```
 
 **Reverse Proxy**
 ```bash
 cd reverse-proxy-service
-npm install
-npm start
+npm install && npm start
 ```
 
-### Docker Build
+### Deploy Servers to AWS
 
-Build server containers for deployment:
-
+Build Docker images:
 ```bash
 docker build -t cloudploy-build-server ./build-server
 docker build -t cloudploy-backend-build-server ./backend-build-server
 ```
 
-Push to AWS ECR:
+Push to ECR:
 ```bash
 aws ecr get-login-password | docker login --username AWS --password-stdin <registry-url>
 docker tag cloudploy-build-server:latest <registry-url>/cloudploy-build-server:latest
 docker push <registry-url>/cloudploy-build-server:latest
 ```
 
-## Key Design Decisions
+## Why This Architecture?
 
-### Multi-stage Build Process
-Separating code compilation and Docker image building allows for:
-- Independent scaling of build stages
-- Specialized tooling per stage (Node.js vs Docker)
-- Failure isolation and retry capability
+**Multi-Stage Builds**
+- Each stage can run independently and scale separately
+- Failures in one stage don't block the other
+- Specialized tools for each job (Node vs Docker)
 
-### AWS ECS Fargate
-Serverless container orchestration reduces operational overhead while maintaining:
-- Auto-scaling based on task queue depth
-- Built-in logging and monitoring
-- Security through task IAM roles
+**AWS ECS Fargate**
+- Runs containers without managing servers
+- Automatically scales based on demand
+- Built-in security and monitoring
 
-### Subdomain-based Routing
-Dynamic routing pattern enables:
-- Multiple versions of same project
-- Isolation between user deployments
-- Stateless proxy service
+**Subdomain Routing**
+- Each deployment gets its own URL
+- Multiple versions can run simultaneously
+- No conflicts between projects
 
-### Limited Credential Scope
-Environment variables are explicitly passed to child processes rather than exposing the entire process.env, reducing credential exposure risk.
+**Security**
+- Only necessary credentials passed to processes
+- No full environment exposure
+- Clear separation of concerns
 
-## Future Enhancements
+## Next Steps
 
 - TypeScript support for build servers
-- Improved error messaging and deployment diagnostics
-- AWS CloudFront + Edge Lambda for global content delivery
-- Task role migration from injected credentials
-- Deployment rollback capability
-- Build caching to improve deployment speed
-- Webhook integration for automatic redeployment on code push
+- Automatic redeployment on code push (webhooks)
+- Build caching for faster deployments
+- Rollback to previous versions
+- Better error messages and logs
+- Global CDN with AWS CloudFront
+- Improved security with AWS task roles
 
-## Development Notes
+<!-- ## Maintenance
 
-### Dependency Security
-- Regular npm audit of dependencies
-- Automated CVE scanning recommended for production
+**Security**
+- Run `npm audit` regularly to check for vulnerabilities
+- Keep dependencies up to date
 
-### Scalability Considerations
-- ECS Fargate auto-scaling based on task queue depth
-- S3 artifact expiration policies to manage storage
-- ECR image lifecycle policies for registry cleanup
+**Scaling**
+- ECS automatically scales build containers as demand increases
+- S3 stores old artifacts; set expiration policies to save cost
+- ECR stores Docker images; clean up old versions regularly
 
-### Monitoring
-- CloudWatch logs for all ECS tasks
-- Deployment status tracking via ProjectID and DeploymentID
-- 3-second polling interval for frontend status updates
-
-## License
-
-MIT
+**Monitoring**
+- CloudWatch tracks all server logs
+- Each deployment gets a unique ID for tracking
+- Frontend checks deployment status every 3 seconds -->
