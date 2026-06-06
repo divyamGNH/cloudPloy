@@ -1,8 +1,11 @@
 import express from "express";
 import dotenv from "dotenv";
 import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
+import { ecs } from "./config/ecsClient.js";
 import cors from "cors";
 import { randomUUID } from "crypto";
+
+import backendDeploymentRouter from "./routes/backendDeploymentRoutes.js";
 
 //Add task roles in order to prevent the use to access and secret ID in the env.
 
@@ -21,13 +24,7 @@ app.use(cors({
 
 const DeploymentStatus = new Map();
 
-const ecs = new ECSClient({
-  region: "ap-south-1",
-  credentials: {
-    accessKeyId: process.env.ACCESS_KEY_ID,
-    secretAccessKey: process.env.SECRET_ACCESS_KEY,
-  },
-});
+app.use("/backend",backendDeploymentRouter);
 
 app.post("/deploy", async (req, res) => {
   const GIT_URL = req.body.githubUrl;

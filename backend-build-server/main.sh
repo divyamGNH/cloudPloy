@@ -1,5 +1,13 @@
 #!/bin/sh
 
 export GIT_URL="$GITHUB_REPOSITORY_URL"
-git clone "$GIT_URL"/home/app/output
-exec node script.js
+
+mkdir -p /home/app/output
+
+cd /home/app/output
+
+git clone "$GIT_URL"
+
+echo "Repository cloned successfully"
+
+exec node /home/app/script.js

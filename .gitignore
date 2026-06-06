@@ -98,3 +98,5 @@ coverage/
 *.local
 
 .history
+
+planner.txt
