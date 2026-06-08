@@ -144,11 +144,11 @@ async function init() {
 async function main() {
   const PROJECT_ID = process.env.PROJECT_ID;
   const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID;
-  const Backend_URL = process.env.Backend_URL;
+  const BACKEND_URL = process.env.BACKEND_URL;
   try {
     await init();
 
-    await axios.post(`${Backend_URL}/deploymentComplete`, {
+    await axios.post(`${BACKEND_URL}/deploymentComplete`, {
       ProjectID: PROJECT_ID,
       DeploymentID: DEPLOYMENT_ID,
       status: "Success",
@@ -158,7 +158,7 @@ async function main() {
     process.exit(0);
   } catch (err) {
     console.log("FATAL ERROR : ", err);
-    await axios.post(`${Backend_URL}/deploymentComplete`, {
+    await axios.post(`${BACKEND_URL}/deploymentComplete`, {
       ProjectID: PROJECT_ID,
       DeploymentID: DEPLOYMENT_ID,
       status: "Failed",

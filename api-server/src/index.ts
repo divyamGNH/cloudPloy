@@ -14,7 +14,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL;
-const FRONTEND_URL=process.env.FRONTEND_URL;
+const FRONTEND_URL = process.env.FRONTEND_URL;
+const API_SERVER_URL = process.env.API_SERVER_URL
 
 app.use(express.json());
 app.use(cors({
@@ -28,7 +29,7 @@ const DeploymentStatus = new Map();
 
 app.post("/deploy", async (req, res) => {
   const GIT_URL = req.body.githubUrl;
-  console.log("The github URL is : ",GIT_URL);
+  console.log("The github URL is : ", GIT_URL);
   const ProjectID = randomUUID();
   console.log(ProjectID);
   const DeploymentID = "1";
@@ -76,6 +77,10 @@ app.post("/deploy", async (req, res) => {
               {
                 name: "DEPLOYMENT_ID",
                 value: DeploymentID,
+              },
+              {
+                name: "API_SERVER_URL",
+                value: API_SERVER_URL,
               },
             ],
           },

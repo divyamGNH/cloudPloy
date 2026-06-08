@@ -10,4 +10,4 @@ git clone "$GIT_URL"
 
 echo "Repository cloned successfully"
 
-exec node /home/app/script.js
+exec node /home/app/dist/script.js

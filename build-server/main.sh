@@ -6,4 +6,4 @@ export GIT_REPOSITORY_URL="$GIT_REPOSITORY_URL"
 # Dockerfile has the workdir setup as home/app
 git clone "$GIT_REPOSITORY_URL" /home/app/output
 
-exec node script.js
+exec node /home/app/dist/script.js
