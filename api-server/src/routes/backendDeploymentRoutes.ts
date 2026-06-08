@@ -1,5 +1,5 @@
 import express from "express";
-import { backendDeployer } from "../controllers/backendDeploymentController";
+import { backendDeployer } from "../controllers/backendDeploymentController.js";
 
 const router = express.Router();
 

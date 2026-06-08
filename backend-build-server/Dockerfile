@@ -20,11 +20,15 @@ RUN curl -L https://github.com/moby/buildkit/releases/download/${BUILDKIT_VERSIO
 
 WORKDIR /home/app
 
-COPY main.sh main.sh
-COPY script.js script.js
 COPY package*.json .
+COPY tsconfig.json .
 
 RUN npm install
+
+COPY src ./src
+COPY main.sh main.sh
+
+RUN npm run build
 
 RUN chmod +x main.sh
 

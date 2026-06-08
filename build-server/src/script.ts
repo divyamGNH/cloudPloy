@@ -3,7 +3,7 @@
 //DONE -> add 2 seperate ID's projectid and deploymentid so that we can map different deployments and versions of code to allow handling changes in the code causing a re deployment.
 //Keep working
 
-import { execFile } from "node:child_process";
+import { execFile, type SpawnOptions } from "node:child_process";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "node:fs";
 import path from "node:path";
@@ -19,8 +19,8 @@ dotenv.config();
 const s3Client = new S3Client({
   region: "ap-south-1",
   credentials: {
-    accessKeyId: process.env.ACCESS_KEY_ID,
-    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    accessKeyId: process.env.ACCESS_KEY_ID!,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY!,
   },
 });
 
@@ -29,16 +29,16 @@ const s3Client = new S3Client({
 
 //The bucket s3client is initialized now what we gotta do is that take the git cloned fodler and upload it to S3 bucket.
 
-const Intro = "Hi I am your personal Builder container i will put your code to the bucket !!" 
+const Intro = "Hi I am your personal Builder container i will put your code to the bucket !!"
 
-function run(command, args, options) {
+function run(command: string, args: string[], options: SpawnOptions): Promise<void> {
   return new Promise((resolve, reject) => {
     const p = execFile(command, args, options);
 
-    p.stdout.on("data", (data) => {
+    p.stdout?.on("data", (data) => {
       console.log(data.toString());
     });
-    p.stderr.on("data", (data) => {
+    p.stderr?.on("data", (data) => {
       console.log(data.toString());
     });
 
@@ -68,6 +68,8 @@ async function init() {
   // const p = exec(`cd ${outDir} && npm install && npm run build`);
 
   //This is what we pass as the env instead of the whole process.env which can be risky so the parent that is the init run function etc get the whole env but the child process that is the exec and execfile etc get only these mentioned vars instead of the whole process.env
+
+  //safeEnv idea is not being utilized rn.
   const safeEnv = {
     PATH: process.env.PATH,
     HOME: process.env.HOME,
@@ -109,7 +111,11 @@ async function init() {
   console.log("Starting to upload on S3 ...");
 
   const distFolderPath = path.join(outDir, "dist");
-  const files = fs.readdirSync(distFolderPath, { recursive: true });
+  const files = fs.readdirSync(distFolderPath, { 
+    recursive: true,
+    // I need files as a string[] only.
+    encoding : "utf8",
+  });
 
   for (const file of files) {
     const filePath = path.join(distFolderPath, file);
@@ -138,7 +144,7 @@ async function init() {
 async function main() {
   const PROJECT_ID = process.env.PROJECT_ID;
   const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID;
-  const Backend_URL= process.env.Backend_URL;
+  const Backend_URL = process.env.Backend_URL;
   try {
     await init();
 

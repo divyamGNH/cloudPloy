@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
-import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
-import { ecs } from "./config/ecsClient.js";
+import { RunTaskCommand } from "@aws-sdk/client-ecs";
+import { createECSClient } from "./config/ecsClient.js";
 import cors from "cors";
 import { randomUUID } from "crypto";
 
@@ -14,17 +14,17 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL;
-const Frontend_URL=process.env.Frontend_URL;
+const FRONTEND_URL=process.env.FRONTEND_URL;
 
 app.use(express.json());
 app.use(cors({
-  origin: Frontend_URL,
+  origin: FRONTEND_URL,
   credentials: true
 }));
 
 const DeploymentStatus = new Map();
 
-app.use("/backend",backendDeploymentRouter);
+// app.use("/backend",backendDeploymentRouter);
 
 app.post("/deploy", async (req, res) => {
   const GIT_URL = req.body.githubUrl;
@@ -33,6 +33,9 @@ app.post("/deploy", async (req, res) => {
   console.log(ProjectID);
   const DeploymentID = "1";
   console.log(DeploymentID);
+
+  console.log(process.env.AWS_ACCESS_KEY_ID);
+  console.log(process.env.AWS_SECRET_ACCESS_KEY);
   try {
     const command = new RunTaskCommand({
       cluster: "vercel-cluster",
@@ -74,20 +77,19 @@ app.post("/deploy", async (req, res) => {
                 name: "DEPLOYMENT_ID",
                 value: DeploymentID,
               },
-              {
-                name: "Backend_URL",
-                value: process.env.Backend_URL,
-              }
             ],
           },
         ],
       },
     });
 
+    const ecs = createECSClient();
+    console.log("Sending ECS command to run a task");
     const response = await ecs.send(command);
+    console.log("ECS task complete");
     DeploymentStatus.set(`${ProjectID}/${DeploymentID}`, "Building");
 
-    const taskArn = response.tasks[0].taskArn;
+    // const taskArn = response.tasks[0].taskArn;
 
     res.json({
       message: "Build container started, Deploying your code",

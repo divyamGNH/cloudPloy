@@ -1,6 +1,11 @@
 import { randomUUID } from "crypto";
-import { ecs } from "../config/ecsClient";
-import { CreateExpressGatewayServiceCommand } from "@aws-sdk/client-ecs";
+import type { Request, Response } from "express";
+
+import { createECSClient } from "../config/ecsClient.js";
+import { CreateExpressGatewayServiceCommand} from "@aws-sdk/client-ecs";
+import { type CreateExpressGatewayServiceCommandInput } from "@aws-sdk/client-ecs";
+
+import type { backendDeploymentResponse } from "../types/backendDeploymentTypes.js";
 
 //See the main goal that we have right now is that we need have our deployement-container ready we need that container to spin up user containers each time the user requests a new backend service.
 
@@ -8,9 +13,12 @@ import { CreateExpressGatewayServiceCommand } from "@aws-sdk/client-ecs";
 
 // We already have a image for the users git repository named ProjectID-DeploymentId in the ECR this controller needs to spin up a ECS service for that image.
 
-export async function backendDeployer(req, res) {
-    const GIT_URL = req.body.githubUrl;
-    console.log("The github URL is : ", GIT_URL);
+export async function backendDeployer(req : Request, res : Response) {
+    // const GIT_URL = req.body.githubUrl;
+    const body : backendDeploymentResponse = req.body;
+    const githubUrl = body.githubUrl;
+
+    console.log("The github URL is : ", githubUrl);
     const ProjectID = randomUUID();
     console.log(ProjectID);
     const DeploymentID = "1";
@@ -18,7 +26,7 @@ export async function backendDeployer(req, res) {
     const PORT = process.env.PORT;
 
     try {
-        const input = { // CreateExpressGatewayServiceRequest
+        const input : CreateExpressGatewayServiceCommandInput = { // CreateExpressGatewayServiceRequest
             executionRoleArn: "arn:aws:iam::801795967285:role/ecsTaskExecutionRole", // required
             infrastructureRoleArn: "arn:aws:iam::801795967285:role/ecsInfrastructureRoleForExpressServices", // required
             serviceName: `${ProjectID}-${DeploymentID}`,
@@ -60,7 +68,9 @@ export async function backendDeployer(req, res) {
                 autoScalingMetric: "AVERAGE_CPU",
                 autoScalingTargetValue: Number("70"),
             }
-        };
+        }; 
+        
+        const ecs = createECSClient();
         const command = new CreateExpressGatewayServiceCommand(input);
         const response = await ecs.send(command);
     } catch (error) {

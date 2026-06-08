@@ -15,5 +15,11 @@
     "axios": "^1.13.6",
     "dotenv": "^17.3.1",
     "mime-types": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "^25.9.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }
