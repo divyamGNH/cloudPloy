@@ -6,6 +6,7 @@ import cors from "cors";
 import { randomUUID } from "crypto";
 
 import backendDeploymentRouter from "./routes/backendDeploymentRoutes.js";
+import { GetEnvironmentConfigs } from "./config/getEnvironment.js"
 
 //Add task roles in order to prevent the use to access and secret ID in the env.
 
@@ -35,8 +36,20 @@ app.post("/deploy", async (req, res) => {
   const DeploymentID = "1";
   console.log(DeploymentID);
 
+  const {
+    AWS_ACCESS_KEY_ID,
+    AWS_SECRET_ACCESS_KEY,
+    PORT,
+    BASE_URL,
+    FRONTEND_URL,
+    API_SERVER_URL,
+  } = GetEnvironmentConfigs();
+
+  console.log(GetEnvironmentConfigs());
+
   console.log(process.env.AWS_ACCESS_KEY_ID);
   console.log(process.env.AWS_SECRET_ACCESS_KEY);
+  console.log("API_URL is", process.env.API_SERVER_URL);
   try {
     const command = new RunTaskCommand({
       cluster: "vercel-cluster",
@@ -65,10 +78,13 @@ app.post("/deploy", async (req, res) => {
                 name: "GIT_REPOSITORY_URL",
                 value: GIT_URL,
               },
-              { name: "ACCESS_KEY_ID", value: process.env.ACCESS_KEY_ID },
               {
-                name: "SECRET_ACCESS_KEY",
-                value: process.env.SECRET_ACCESS_KEY,
+                name: "AWS_ACCESS_KEY_ID",
+                value: process.env.AWS_ACCESS_KEY_ID
+              },
+              {
+                name: "AWS_SECRET_ACCESS_KEY",
+                value: process.env.AWS_SECRET_ACCESS_KEY,
               },
               {
                 name: "PROJECT_ID",

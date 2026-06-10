@@ -18,6 +18,7 @@ export default function GithubForm() {
     });
 
     const { ProjectID, DeploymentID } = res.data;
+    console.log(ProjectID);
 
     setIsDeploying(true);
     console.log(isDeploying);

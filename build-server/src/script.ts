@@ -17,11 +17,7 @@ dotenv.config();
 
 //One update is that remove all these S3 creds from the env and actully declare task roles when we run task in ECS it is secure as then the key injection that access and secret key is handeled by AWS not me so the sensitive env vars are not accessed by the parent and child process at all.
 const s3Client = new S3Client({
-  region: "ap-south-1",
-  credentials: {
-    accessKeyId: process.env.ACCESS_KEY_ID!,
-    secretAccessKey: process.env.SECRET_ACCESS_KEY!,
-  },
+  region: "ap-south-1"
 });
 
 // const id = randomUUID();
@@ -59,10 +55,19 @@ function run(command: string, args: string[], options: SpawnOptions): Promise<vo
 
 async function init() {
   console.log("Executing the script.js");
+  const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+  const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+  const GIT_REPOSITORY_URL = process.env.GIT_REPOSITORY_URL;
   const PROJECT_ID = process.env.PROJECT_ID;
   const DEPLOYMENT_ID = process.env.DEPLOYMENT_ID;
-  console.log(`This is the ProjectId : ${PROJECT_ID}`);
-  console.log(`This is the DeploymentId : ${DEPLOYMENT_ID}`);
+  const API_SERVER_URL = process.env.API_SERVER_URL;
+
+  console.log("AWS_ACCESS_KEY_ID:", AWS_ACCESS_KEY_ID);
+  console.log("AWS_SECRET_ACCESS_KEY:", AWS_SECRET_ACCESS_KEY);
+  console.log("GIT_REPOSITORY_URL:", GIT_REPOSITORY_URL);
+  console.log("PROJECT_ID:", PROJECT_ID);
+  console.log("DEPLOYMENT_ID:", DEPLOYMENT_ID);
+  console.log("API_SERVER_URL:", API_SERVER_URL);
 
   const outDir = "/home/app/output";
   // const p = exec(`cd ${outDir} && npm install && npm run build`);
@@ -111,10 +116,10 @@ async function init() {
   console.log("Starting to upload on S3 ...");
 
   const distFolderPath = path.join(outDir, "dist");
-  const files = fs.readdirSync(distFolderPath, { 
+  const files = fs.readdirSync(distFolderPath, {
     recursive: true,
     // I need files as a string[] only.
-    encoding : "utf8",
+    encoding: "utf8",
   });
 
   for (const file of files) {
