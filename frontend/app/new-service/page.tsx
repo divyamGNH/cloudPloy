@@ -25,9 +25,15 @@ export default function GithubForm() {
   }
 
   async function handleServiceDeploy() {
-    // TODO:
-    // Implement service deployment here.
-    // You can call your backend API from this function.
+    console.log("Deploying service");
+    const res = axios.post(`${BACKEND_URL}/backend-deploy`, {
+      GITHUB_URL : githubUrl,
+    });
+
+    // const {ProjectID, DeploymentID} = response.data;
+
+    setIsDeploying(true);
+    setLiveUrl("");
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

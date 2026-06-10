@@ -63,7 +63,7 @@ export async function backendDeployer(req: Request, res: Response) {
             overrides: {
                 containerOverrides: [
                     {
-                        name: "Main",
+                        name: "backend-builder",
                         environment: [
                             {
                                 name: "GIT_REPOSITORY_URL",
