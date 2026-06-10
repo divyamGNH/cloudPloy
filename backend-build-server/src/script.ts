@@ -70,7 +70,7 @@ async function init() {
   const BUILDKIT_HOST = requireEnv("BUILDKIT_HOST");
   // There are a lot of env vars not used here look into that as well.
 
-  const PROJECT_DIRECTORY = `/home/app/output/${PROJECT_ID}-${DEPLOYMENT_ID}/${PROJECT_ROOT}`;
+  const PROJECT_DIRECTORY = `/home/app/output/${PROJECT_ID}-${DEPLOYMENT_ID}${PROJECT_ROOT}`;
 
   //spawn(command, [args], [options])
   //args are the arguments split like command + args is the overall commands that we want to run.
