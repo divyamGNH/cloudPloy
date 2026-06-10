@@ -64,14 +64,13 @@ function requireEnv(name: string): string {
 
 async function init() {
   // TODO : Replace all these env vars with user input.
-  const PROJECT_NAME = requireEnv("PROJECT_NAME");
   const PROJECT_ROOT = requireEnv("PROJECT_ROOT");
   const PROJECT_ID = requireEnv("PROJECT_ID");
   const DEPLOYMENT_ID = requireEnv("DEPLOYMENT_ID");
   const BUILDKIT_HOST = requireEnv("BUILDKIT_HOST");
   // There are a lot of env vars not used here look into that as well.
 
-  const PROJECT_DIRECTORY = `/home/app/output/${PROJECT_NAME}${PROJECT_ROOT}`;
+  const PROJECT_DIRECTORY = `/home/app/output/${PROJECT_ID}-${DEPLOYMENT_ID}/${PROJECT_ROOT}`;
 
   //spawn(command, [args], [options])
   //args are the arguments split like command + args is the overall commands that we want to run.

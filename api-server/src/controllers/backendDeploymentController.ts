@@ -25,7 +25,6 @@ export async function backendDeployer(req: Request, res: Response) {
         BUILD_COMMAND,
         START_COMMAND,
         PROJECT_ROOT,
-        PROJECT_NAME,
     } = body;
 
     const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
@@ -66,7 +65,7 @@ export async function backendDeployer(req: Request, res: Response) {
                         name: "backend-builder",
                         environment: [
                             {
-                                name: "GIT_REPOSITORY_URL",
+                                name: "GITHUB_REPOSITORY_URL",
                                 value: GITHUB_URL,
                             },
                             {
@@ -84,10 +83,6 @@ export async function backendDeployer(req: Request, res: Response) {
                             {
                                 name: "PROJECT_ROOT",
                                 value: PROJECT_ROOT,
-                            },
-                            {
-                                name: "PROJECT_NAME",
-                                value: PROJECT_NAME,
                             },
                             {
                                 name: "PROJECT_ID",

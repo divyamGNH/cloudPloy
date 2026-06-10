@@ -4,5 +4,4 @@ export type backendDeploymentRequestBody = {
     BUILD_COMMAND: string,
     START_COMMAND: string,
     PROJECT_ROOT: string,
-    PROJECT_NAME: string,
 }
