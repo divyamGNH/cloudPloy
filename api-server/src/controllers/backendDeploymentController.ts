@@ -1,79 +1,146 @@
 import { randomUUID } from "crypto";
 import type { Request, Response } from "express";
+import { RunTaskCommand } from "@aws-sdk/client-ecs";
 
 import { createECSClient } from "../config/ecsClient.js";
-import { CreateExpressGatewayServiceCommand} from "@aws-sdk/client-ecs";
-import { type CreateExpressGatewayServiceCommandInput } from "@aws-sdk/client-ecs";
+import type { backendDeploymentRequestBody } from "../types/backendDeploymentTypes.js";
 
-import type { backendDeploymentResponse } from "../types/backendDeploymentTypes.js";
+// See the main goal that we have right now is that we need have our
+// deployment-container ready. We need that container to spin up user
+// containers each time the user requests a new backend service.
 
-//See the main goal that we have right now is that we need have our deployement-container ready we need that container to spin up user containers each time the user requests a new backend service.
+// We dont care for upscaling or downscaling the containers as for now
+// we are using AWS Fargate which does it for us.
 
-//We dont care for upscaling or downscaling the containers as for now we are using the AWS fargate which does it for us.
+// We already have an image for the user's git repository named
+// ProjectID-DeploymentId in ECR. This controller needs to spin up
+// an ECS service for that image.
 
-// We already have a image for the users git repository named ProjectID-DeploymentId in the ECR this controller needs to spin up a ECS service for that image.
+export async function backendDeployer(req: Request, res: Response) {
+    const body: backendDeploymentRequestBody = req.body;
 
-export async function backendDeployer(req : Request, res : Response) {
-    // const GIT_URL = req.body.githubUrl;
-    const body : backendDeploymentResponse = req.body;
-    const githubUrl = body.githubUrl;
+    const {
+        GITHUB_URL,
+        RUNTIME,
+        BUILD_COMMAND,
+        START_COMMAND,
+        PROJECT_ROOT,
+        PROJECT_NAME,
+    } = body;
 
-    console.log("The github URL is : ", githubUrl);
-    const ProjectID = randomUUID();
-    console.log(ProjectID);
-    const DeploymentID = "1";
-    console.log(DeploymentID);
+    const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+    const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+    const BUILDKIT_HOST = process.env.BUILDKIT_HOST;
     const PORT = process.env.PORT;
+    const API_SERVER_URL = process.env.API_SERVER_URL;
+
+    const ProjectID = randomUUID();
+    const DeploymentID = "1";
+
+    console.log("The github URL is :", GITHUB_URL);
+    console.log("ProjectId is :", ProjectID);
+    console.log("DeploymentId is :", DeploymentID);
 
     try {
-        const input : CreateExpressGatewayServiceCommandInput = { // CreateExpressGatewayServiceRequest
-            executionRoleArn: "arn:aws:iam::801795967285:role/ecsTaskExecutionRole", // required
-            infrastructureRoleArn: "arn:aws:iam::801795967285:role/ecsInfrastructureRoleForExpressServices", // required
-            serviceName: `${ProjectID}-${DeploymentID}`,
+        const command = new RunTaskCommand({
             cluster: "backend-deployment-cluster",
+            taskDefinition: "cloudPloy-backend-image-generator",
+            launchType: "FARGATE",
+            count: 1,
 
-            // healthCheckPath: "STRING_VALUE",
-            primaryContainer: { // ExpressGatewayContainer
-                image: "801795967285.dkr.ecr.ap-south-1.amazonaws.com/backend-deployment-service@sha256:709f6963e6f8142c8506dffaf1aad85b9ae3ebcd634124fa8888775851acbedf", // required
-                containerPort: Number(`${PORT}`),
-                // awsLogsConfiguration: { // ExpressGatewayServiceAwsLogsConfiguration
-                //     logGroup: "STRING_VALUE", // required
-                //     logStreamPrefix: "STRING_VALUE", // required
-                // },
-                // repositoryCredentials: { // ExpressGatewayRepositoryCredentials
-                //     credentialsParameter: "STRING_VALUE",
-                // },
-                // command: [ // StringList
-                //     "STRING_VALUE",
-                // ],
-                environment: [ // EnvironmentVariables
-                    { // KeyValuePair
-                        name: "PORT",
-                        value: "3000",
+            networkConfiguration: {
+                awsvpcConfiguration: {
+                    subnets: [
+                        "subnet-0d0f2f8059a9de264",
+                        "subnet-0dacc8e6c96b9b6a1",
+                        "subnet-071a8e22c077c0d24",
+                    ],
+                    securityGroups: ["sg-061cab7e4e6397439"],
+                    assignPublicIp: "ENABLED",
+                },
+            },
+
+            overrides: {
+                containerOverrides: [
+                    {
+                        name: "Main",
+                        environment: [
+                            {
+                                name: "GIT_REPOSITORY_URL",
+                                value: GITHUB_URL,
+                            },
+                            {
+                                name: "RUNTIME",
+                                value: RUNTIME,
+                            },
+                            {
+                                name: "BUILD_COMMAND",
+                                value: BUILD_COMMAND,
+                            },
+                            {
+                                name: "START_COMMAND",
+                                value: START_COMMAND,
+                            },
+                            {
+                                name: "PROJECT_ROOT",
+                                value: PROJECT_ROOT,
+                            },
+                            {
+                                name: "PROJECT_NAME",
+                                value: PROJECT_NAME,
+                            },
+                            {
+                                name: "PROJECT_ID",
+                                value: ProjectID,
+                            },
+                            {
+                                name: "DEPLOYMENT_ID",
+                                value: DeploymentID,
+                            },
+                            {
+                                name: "AWS_ACCESS_KEY_ID",
+                                value: AWS_ACCESS_KEY_ID,
+                            },
+                            {
+                                name: "AWS_SECRET_ACCESS_KEY",
+                                value: AWS_SECRET_ACCESS_KEY,
+                            },
+                            {
+                                name: "BUILDKIT_HOST",
+                                value: BUILDKIT_HOST,
+                            },
+                            {
+                                name: "PORT",
+                                value: PORT,
+                            },
+                            {
+                                name: "API_SERVER_URL",
+                                value: API_SERVER_URL,
+                            },
+                        ],
                     },
                 ],
-                // secrets: [ // SecretList
-                //     { // Secret
-                //         name: "STRING_VALUE", // required
-                //         valueFrom: "STRING_VALUE", // required
-                //     },
-                // ],
             },
-            taskRoleArn: "arn:aws:iam::801795967285:role/ecsTaskExecutionRole",
-            cpu: "1 vCPU",
-            memory: "2 GB",
-            scalingTarget: { // ExpressGatewayScalingTarget
-                minTaskCount: Number("1"),
-                maxTaskCount: Number("10"),
-                autoScalingMetric: "AVERAGE_CPU",
-                autoScalingTargetValue: Number("70"),
-            }
-        }; 
-        
+        });
+
         const ecs = createECSClient();
-        const command = new CreateExpressGatewayServiceCommand(input);
-        const response = await ecs.send(command);
-    } catch (error) {
-        console.log("Backend deployment container had an error : ",error);
+
+        console.log("Sending ECS command to run a task");
+
+        await ecs.send(command);
+
+        console.log("ECS task complete");
+
+        res.json({
+            message: "Build container started, Deploying your code",
+            ProjectID,
+            DeploymentID,
+        });
+    } catch (err) {
+        console.error(err);
+
+        res.status(500).json({
+            error: "Failed to run task",
+        });
     }
 }

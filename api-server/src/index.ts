@@ -1,13 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
-import { RunTaskCommand } from "@aws-sdk/client-ecs";
-import { createECSClient } from "./config/ecsClient.js";
 import cors from "cors";
-import { randomUUID } from "crypto";
 
 import backendDeploymentRouter from "./routes/backendDeploymentRoutes.js";
 import frontendDeploymentRouter from "./routes/frontendDeploymentRoutes.js";
-import { GetEnvironmentConfigs } from "./config/getEnvironment.js"
 
 //Add task roles in order to prevent the use to access and secret ID in the env.
 
@@ -27,10 +23,11 @@ app.use(cors({
 
 const DeploymentStatus = new Map();
 
-// app.use("/backend",backendDeploymentRouter);
-
+app.use("/backend-deploy",backendDeploymentRouter);
 app.use("/deploy", frontendDeploymentRouter);
 
+
+// TODO : Deprecate these 2 routes as we will need to poll AWS task by ARN to check it ended succesfully or not hence we won't need these routes later.
 app.get("/deploymentStatus", (req, res) => {
   const { ProjectID, DeploymentID } = req.query;
 

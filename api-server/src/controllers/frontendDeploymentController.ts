@@ -1,4 +1,4 @@
-import { ECSClient, RunTaskCommand } from "@aws-sdk/client-ecs";
+import { RunTaskCommand } from "@aws-sdk/client-ecs";
 import { randomUUID } from "crypto";
 import { GetEnvironmentConfigs } from "../config/getEnvironment.js";
 import type { Request, Response } from "express";
@@ -84,7 +84,7 @@ export async function Deployer(req : Request, res : Response) {
 
         const ecs = createECSClient();
         console.log("Sending ECS command to run a task");
-        const response = await ecs.send(command);
+        await ecs.send(command);
         console.log("ECS task complete");
         DeploymentStatus.set(`${ProjectID}/${DeploymentID}`, "Building");
 
