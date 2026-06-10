@@ -54,7 +54,7 @@ export async function backendDeployer(req: Request, res: Response) {
                         "subnet-0dacc8e6c96b9b6a1",
                         "subnet-071a8e22c077c0d24",
                     ],
-                    securityGroups: ["sg-061cab7e4e6397439"],
+                    securityGroups: ["sg-061cab7e4e6397439", "sg-0ddb6f89d533e49d3"],
                     assignPublicIp: "ENABLED",
                 },
             },

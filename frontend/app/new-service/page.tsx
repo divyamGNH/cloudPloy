@@ -2,14 +2,24 @@
 
 import { useState } from "react";
 import axios from "axios";
+import { BackendDeploymentResponse } from "@/types/backendDeploymentTypes";
 
 export default function GithubForm() {
   const [githubUrl, setGithubUrl] = useState("");
-  const [deployType, setDeployType] = useState<"frontend" | "service">("frontend");
+  const [deployType, setDeployType] = useState<"frontend" | "service">(
+    "frontend",
+  );
   const [isDeploying, setIsDeploying] = useState(false);
   const [liveUrl, setLiveUrl] = useState("");
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+  const [runtime, setRuntime] = useState("go");
+  const [buildCommand, setBuildCommand] = useState(
+    "go build -o server .",
+  );
+  const [startCommand, setStartCommand] = useState("./server");
+  const [projectRoot, setProjectRoot] = useState("/backend");
 
   async function handleFrontendDeploy() {
     const res = await axios.post(`${BACKEND_URL}/deploy`, {
@@ -25,15 +35,25 @@ export default function GithubForm() {
   }
 
   async function handleServiceDeploy() {
-    console.log("Deploying service");
-    const res = axios.post(`${BACKEND_URL}/backend-deploy`, {
-      GITHUB_URL : githubUrl,
-    });
-
-    // const {ProjectID, DeploymentID} = response.data;
-
     setIsDeploying(true);
     setLiveUrl("");
+
+    try {
+      const payload : BackendDeploymentResponse = {
+        GITHUB_URL: githubUrl,
+        RUNTIME: runtime,
+        BUILD_COMMAND: buildCommand,
+        START_COMMAND: startCommand,
+        PROJECT_ROOT: projectRoot,
+      }
+      const res = await axios.post(`${BACKEND_URL}/backend-deploy`, payload);
+
+      console.log(res.data);
+      setIsDeploying(false);
+    } catch (err) {
+      console.error(err);
+      setIsDeploying(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -48,7 +68,10 @@ export default function GithubForm() {
     }
   }
 
-  async function pollForDeploymentStatus(projectID: string, deploymentID: string) {
+  async function pollForDeploymentStatus(
+    projectID: string,
+    deploymentID: string,
+  ) {
     const res = await axios.get(`${BACKEND_URL}/deploymentStatus`, {
       params: {
         ProjectID: projectID,
@@ -166,9 +189,7 @@ export default function GithubForm() {
               ✅ Deployment Successful
             </h2>
 
-            <p className="mt-2 text-zinc-300">
-              Your project is now live.
-            </p>
+            <p className="mt-2 text-zinc-300">Your project is now live.</p>
 
             <a
               href={liveUrl}
