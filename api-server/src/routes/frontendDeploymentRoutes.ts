@@ -1,7 +1,8 @@
-// import express from "express";
+import express from "express";
+import { Deployer } from "../controllers/frontendDeploymentController.js";
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.post("/",);
+router.post("/", Deployer);
 
-// export default router;
+export default router;
