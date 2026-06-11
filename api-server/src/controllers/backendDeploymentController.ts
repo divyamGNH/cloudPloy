@@ -122,7 +122,8 @@ export async function backendDeployer(req: Request, res: Response) {
 
         console.log("Sending ECS command to run a task");
 
-        await ecs.send(command);
+        const response = await ecs.send(command);
+        console.log(response);
 
         console.log("ECS task complete");
 
