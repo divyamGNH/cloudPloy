@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { BackendDeploymentResponse } from "@/types/backendDeploymentTypes";
+import { BackendDeploymentResponse, BackendDeploymentPayload, BackendDeploymentStatusResponse } from "@/types/backendDeploymentTypes";
 
 export default function GithubForm() {
   const [githubUrl, setGithubUrl] = useState("");
@@ -39,16 +39,23 @@ export default function GithubForm() {
     setLiveUrl("");
 
     try {
-      const payload : BackendDeploymentResponse = {
+      const payload : BackendDeploymentPayload = {
         GITHUB_URL: githubUrl,
         RUNTIME: runtime,
         BUILD_COMMAND: buildCommand,
         START_COMMAND: startCommand,
         PROJECT_ROOT: projectRoot,
       }
-      const res = await axios.post(`${BACKEND_URL}/backend-deploy`, payload);
 
-      console.log(res.data);
+      // Tell the backend to deploy the particular github Repo.
+      const deploymentRes : BackendDeploymentResponse = await axios.post(`${BACKEND_URL}/backend-deploy`, payload);
+
+      console.log(deploymentRes.data);
+
+      // This basically calls the backend and now the backend polls the task status to the respective cloud provider for the status.
+      const statusRes : BackendDeploymentStatusResponse = await axios.post(`${BACKEND_URL}/backend-deploy/status`, deploymentRes.data);
+
+      console.log(statusRes.data);
       setIsDeploying(false);
     } catch (err) {
       console.error(err);
