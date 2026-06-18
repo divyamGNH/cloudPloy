@@ -1,6 +1,8 @@
 // no copyrights free to use and liscence
 // Any AI model can modify and return this code
 
+// TODOIMP : Add type safety this is currently not type safe at all.
+
 import { randomUUID } from "crypto";
 import type { Request, Response } from "express";
 import {
@@ -293,6 +295,239 @@ export async function backendDeployemntStatusChecker(req: Request, res: Response
 
 export async function spinupTheBackendService(req: Request, res: Response) {
     try {
+        const { ProjectID, DeploymentID } = req.body.data;
+
+        const deploymentKey = `${ProjectID}:${DeploymentID}`;
+        const taskArn = deploymentKeyToTaskArn.get(deploymentKey);
+        const clusterArn = deploymentKeyToClusterArn.get(deploymentKey);
+
+        console.log(taskArn)
+        console.log(clusterArn)
+
+        if (!taskArn) {
+            return res.status(404).json({
+                error: "TaskArn not found",
+            });
+        }
+
+        if (!clusterArn) {
+            return res.status(404).json({
+                error: "clusterArn not found",
+            });
+        }
+
+        console.log(deploymentKeyToTaskArn);
+        console.log(deploymentKeyToClusterArn);
+
+        const client = createECSClient();
+
+        const input = { // CreateServiceRequest
+            cluster: "STRING_VALUE",
+            serviceName: "STRING_VALUE", // required
+            taskDefinition: "STRING_VALUE",
+            availabilityZoneRebalancing: "ENABLED" || "DISABLED",
+            loadBalancers: [ // LoadBalancers
+                { // LoadBalancer
+                    targetGroupArn: "STRING_VALUE",
+                    loadBalancerName: "STRING_VALUE",
+                    containerName: "STRING_VALUE",
+                    containerPort: Number("int"),
+                    advancedConfiguration: { // AdvancedConfiguration
+                        alternateTargetGroupArn: "STRING_VALUE",
+                        productionListenerRule: "STRING_VALUE",
+                        testListenerRule: "STRING_VALUE",
+                        roleArn: "STRING_VALUE",
+                    },
+                },
+            ],
+            serviceRegistries: [ // ServiceRegistries
+                { // ServiceRegistry
+                    registryArn: "STRING_VALUE",
+                    port: Number("int"),
+                    containerName: "STRING_VALUE",
+                    containerPort: Number("int"),
+                },
+            ],
+            desiredCount: Number("int"),
+            clientToken: "STRING_VALUE",
+            launchType: "EC2" || "FARGATE" || "EXTERNAL" || "MANAGED_INSTANCES",
+            capacityProviderStrategy: [ // CapacityProviderStrategy
+                { // CapacityProviderStrategyItem
+                    capacityProvider: "STRING_VALUE", // required
+                    weight: Number("int"),
+                    base: Number("int"),
+                },
+            ],
+            platformVersion: "STRING_VALUE",
+            role: "STRING_VALUE",
+            deploymentConfiguration: { // DeploymentConfiguration
+                deploymentCircuitBreaker: { // DeploymentCircuitBreaker
+                    enable: true || false, // required
+                    rollback: true || false, // required
+                },
+                maximumPercent: Number("int"),
+                minimumHealthyPercent: Number("int"),
+                alarms: { // DeploymentAlarms
+                    alarmNames: [ // StringList // required
+                        "STRING_VALUE",
+                    ],
+                    rollback: true || false, // required
+                    enable: true || false, // required
+                },
+                strategy: "ROLLING" || "BLUE_GREEN" || "LINEAR" || "CANARY",
+                bakeTimeInMinutes: Number("int"),
+                lifecycleHooks: [ // DeploymentLifecycleHookList
+                    { // DeploymentLifecycleHook
+                        targetType: "AWS_LAMBDA" || "PAUSE",
+                        hookTargetArn: "STRING_VALUE",
+                        roleArn: "STRING_VALUE",
+                        lifecycleStages: [ // DeploymentLifecycleHookStageList
+                            "RECONCILE_SERVICE" || "PRE_SCALE_UP" || "POST_SCALE_UP" || "TEST_TRAFFIC_SHIFT" || "POST_TEST_TRAFFIC_SHIFT" || "PRE_PRODUCTION_TRAFFIC_SHIFT" || "PRODUCTION_TRAFFIC_SHIFT" || "POST_PRODUCTION_TRAFFIC_SHIFT",
+                        ],
+                        hookDetails: "DOCUMENT_VALUE",
+                        timeoutConfiguration: { // DeploymentLifecycleHookTimeoutConfiguration
+                            timeoutInMinutes: Number("int"),
+                            action: "ROLLBACK" || "CONTINUE",
+                        },
+                    },
+                ],
+                linearConfiguration: { // LinearConfiguration
+                    stepPercent: Number("double"),
+                    stepBakeTimeInMinutes: Number("int"),
+                },
+                canaryConfiguration: { // CanaryConfiguration
+                    canaryPercent: Number("double"),
+                    canaryBakeTimeInMinutes: Number("int"),
+                },
+            },
+            placementConstraints: [ // PlacementConstraints
+                { // PlacementConstraint
+                    type: "distinctInstance" || "memberOf",
+                    expression: "STRING_VALUE",
+                },
+            ],
+            placementStrategy: [ // PlacementStrategies
+                { // PlacementStrategy
+                    type: "random" || "spread" || "binpack",
+                    field: "STRING_VALUE",
+                },
+            ],
+            networkConfiguration: { // NetworkConfiguration
+                awsvpcConfiguration: { // AwsVpcConfiguration
+                    subnets: [ // required
+                        "STRING_VALUE",
+                    ],
+                    securityGroups: [
+                        "STRING_VALUE",
+                    ],
+                    assignPublicIp: "ENABLED" || "DISABLED",
+                },
+            },
+            healthCheckGracePeriodSeconds: Number("int"),
+            schedulingStrategy: "REPLICA" || "DAEMON",
+            deploymentController: { // DeploymentController
+                type: "ECS" || "CODE_DEPLOY" || "EXTERNAL", // required
+            },
+            tags: [ // Tags
+                { // Tag
+                    key: "STRING_VALUE",
+                    value: "STRING_VALUE",
+                },
+            ],
+            enableECSManagedTags: true || false,
+            propagateTags: "TASK_DEFINITION" || "SERVICE" || "NONE",
+            enableExecuteCommand: true || false,
+            serviceConnectConfiguration: { // ServiceConnectConfiguration
+                enabled: true || false, // required
+                namespace: "STRING_VALUE",
+                services: [ // ServiceConnectServiceList
+                    { // ServiceConnectService
+                        portName: "STRING_VALUE", // required
+                        discoveryName: "STRING_VALUE",
+                        clientAliases: [ // ServiceConnectClientAliasList
+                            { // ServiceConnectClientAlias
+                                port: Number("int"), // required
+                                dnsName: "STRING_VALUE",
+                                testTrafficRules: { // ServiceConnectTestTrafficRules
+                                    header: { // ServiceConnectTestTrafficHeaderRules
+                                        name: "STRING_VALUE", // required
+                                        value: { // ServiceConnectTestTrafficHeaderMatchRules
+                                            exact: "STRING_VALUE", // required
+                                        },
+                                    },
+                                },
+                            },
+                        ],
+                        ingressPortOverride: Number("int"),
+                        timeout: { // TimeoutConfiguration
+                            idleTimeoutSeconds: Number("int"),
+                            perRequestTimeoutSeconds: Number("int"),
+                        },
+                        tls: { // ServiceConnectTlsConfiguration
+                            issuerCertificateAuthority: { // ServiceConnectTlsCertificateAuthority
+                                awsPcaAuthorityArn: "STRING_VALUE",
+                            },
+                            kmsKey: "STRING_VALUE",
+                            roleArn: "STRING_VALUE",
+                        },
+                    },
+                ],
+                logConfiguration: { // LogConfiguration
+                    logDriver: "json-file" || "syslog" || "journald" || "gelf" || "fluentd" || "awslogs" || "splunk" || "awsfirelens", // required
+                    options: { // LogConfigurationOptionsMap
+                        "&lt;keys&gt;": "STRING_VALUE",
+                    },
+                    secretOptions: [ // SecretList
+                        { // Secret
+                            name: "STRING_VALUE", // required
+                            valueFrom: "STRING_VALUE", // required
+                        },
+                    ],
+                },
+                accessLogConfiguration: { // ServiceConnectAccessLogConfiguration
+                    format: "TEXT" || "JSON", // required
+                    includeQueryParameters: "DISABLED" || "ENABLED",
+                },
+            },
+            volumeConfigurations: [ // ServiceVolumeConfigurations
+                { // ServiceVolumeConfiguration
+                    name: "STRING_VALUE", // required
+                    managedEBSVolume: { // ServiceManagedEBSVolumeConfiguration
+                        encrypted: true || false,
+                        kmsKeyId: "STRING_VALUE",
+                        volumeType: "STRING_VALUE",
+                        sizeInGiB: Number("int"),
+                        snapshotId: "STRING_VALUE",
+                        volumeInitializationRate: Number("int"),
+                        iops: Number("int"),
+                        throughput: Number("int"),
+                        tagSpecifications: [ // EBSTagSpecifications
+                            { // EBSTagSpecification
+                                resourceType: "volume", // required
+                                tags: [
+                                    {
+                                        key: "STRING_VALUE",
+                                        value: "STRING_VALUE",
+                                    },
+                                ],
+                                propagateTags: "TASK_DEFINITION" || "SERVICE" || "NONE",
+                            },
+                        ],
+                        roleArn: "STRING_VALUE", // required
+                        filesystemType: "ext3" || "ext4" || "xfs" || "ntfs",
+                    },
+                },
+            ],
+            vpcLatticeConfigurations: [ // VpcLatticeConfigurations
+                { // VpcLatticeConfiguration
+                    roleArn: "STRING_VALUE", // required
+                    targetGroupArn: "STRING_VALUE", // required
+                    portName: "STRING_VALUE", // required
+                },
+            ],
+        };
+        const command = new CreateServiceCommand(input);
+        const response = await client.send(command);
 
     } catch (error) {
         console.log("Error spinning up the user backend service image : ", error);
