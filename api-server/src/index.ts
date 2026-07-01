@@ -1,11 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import backendDeploymentRouter from "./routes/backendDeploymentRoutes.js";
 import frontendDeploymentRouter from "./routes/frontendDeploymentRoutes.js";
+import authRouter from "./routes/authRoutes.js";
 
 //Add task roles in order to prevent the use to access and secret ID in the env.
+
+// TODO : Add the config approach as we did in GO for env variables just to be safe and that is more production grade.
 
 dotenv.config();
 
@@ -20,11 +24,13 @@ app.use(cors({
   origin: FRONTEND_URL,
   credentials: true
 }));
+app.use(cookieParser());
 
 const DeploymentStatus = new Map();
 
 app.use("/backend-deploy",backendDeploymentRouter);
 app.use("/deploy", frontendDeploymentRouter);
+app.use("/auth", authRouter)
 
 
 // TODO : Deprecate these 2 routes as we will need to poll AWS task by ARN to check it ended succesfully or not hence we won't need these routes later.
