@@ -6,6 +6,8 @@ import cookieParser from "cookie-parser";
 import backendDeploymentRouter from "./routes/backendDeploymentRoutes.js";
 import frontendDeploymentRouter from "./routes/frontendDeploymentRoutes.js";
 import authRouter from "./routes/authRoutes.js";
+import projectRouter from "./routes/projectRoutes.js";
+import { requireAuth } from "./middlewares/auth.js"
 
 //Add task roles in order to prevent the use to access and secret ID in the env.
 
@@ -28,10 +30,10 @@ app.use(cookieParser());
 
 const DeploymentStatus = new Map();
 
-app.use("/backend-deploy",backendDeploymentRouter);
-app.use("/deploy", frontendDeploymentRouter);
-app.use("/auth", authRouter)
-
+app.use("/auth", authRouter);
+app.use("/backend-deploy", requireAuth, backendDeploymentRouter);
+app.use("/deploy", requireAuth, frontendDeploymentRouter);
+app.use("/project", requireAuth, projectRouter)
 
 // TODO : Deprecate these 2 routes as we will need to poll AWS task by ARN to check it ended succesfully or not hence we won't need these routes later.
 app.get("/deploymentStatus", (req, res) => {

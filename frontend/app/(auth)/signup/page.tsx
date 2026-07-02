@@ -4,8 +4,6 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 
-const API = "http://localhost:5000";
-
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

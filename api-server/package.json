@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "watch": "tsc -b --watch",
-    "serve": "node --env-file=.env dist/index.js",
-    "dev": "concurrently \"npm:watch\" \"npm:serve\""
+    "serve": "nodemon --watch dist --ext js --exec \"node --env-file=.env dist/index.js\"",
+    "dev": "concurrently \"npm run watch\" \"npm run serve\""
   },
   "keywords": [],
   "author": "",
