@@ -10,6 +10,14 @@ const setTokenCookies = (res: Response, tokens: AuthTokens) => {
     sameSite: "lax",
     secure: false,
   });
+
+  res.cookie("access-token", tokens.accessToken, {
+    httpOnly: true,
+    path: "/",
+    maxAge: tokens.accessTTL * 1000,
+    sameSite: "lax",
+    secure: false,
+  });
 };
 
 export const login = async (req: Request, res: Response) => {

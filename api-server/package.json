@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.ts",
-    "build": "tsc -b",
-    "dev": "node --env-file=.env dist/index.js"
+    "watch": "tsc -b --watch",
+    "serve": "node --env-file=.env dist/index.js",
+    "dev": "concurrently \"npm:watch\" \"npm:serve\""
   },
   "keywords": [],
   "author": "",
