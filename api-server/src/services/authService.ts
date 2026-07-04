@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { db } from "../db/db.js";
 import { createUser, getUserByEmail } from "../repositories/userRepo.js";
 import { generateAccessToken, generateRefreshToken, parseRefreshToken } from "../jwt/jwt.js";
 import type { LoginReq, SignupReq, LoginRes, SignupRes, RefreshRes } from "../types/authTypes.js";
@@ -8,7 +9,7 @@ const ACCESS_TTL = 15 * 60;
 const REFRESH_TTL = 7 * 24 * 60 * 60;
 
 export const login = async (req: LoginReq): Promise<LoginRes> => {
-  const user = await getUserByEmail(req.email);
+  const user = await getUserByEmail(db, req.email);
   if (!user) throw new Error("invalid credentials");
 
   const valid = await bcrypt.compare(req.password, user.password_hash);
@@ -38,7 +39,7 @@ export const signup = async (req: SignupReq): Promise<SignupRes> => {
   console.log(process.env.DATABASE_URL);
 
   try {
-    const user = await createUser(req.name, req.email, passwordHash);
+    const user = await createUser(db, req.name, req.email, passwordHash);
 
     const res: SignupRes = {
       userId: user.user_id,

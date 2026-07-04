@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { type User } from "../types/db.js";
-import { query } from "../db/query.js";
+import { type DB, query } from "../db/query.js";
 
-export async function createUser(name : string, email: string, passwordHash: string): Promise<User> {
+export async function createUser(db: DB, name : string, email: string, passwordHash: string): Promise<User> {
 
     const userId : string = randomUUID();
 
@@ -17,27 +17,27 @@ export async function createUser(name : string, email: string, passwordHash: str
         RETURNING *
     `;
 
-    const result = await query<User>(sql,[userId, name, email, passwordHash]);
+    const result = await query<User>(db, sql,[userId, name, email, passwordHash]);
 
     return result.rows[0];
 }
 
-export async function getUserByEmail(email : string) : Promise<User|null>{ 
+export async function getUserByEmail(db: DB, email : string) : Promise<User|null>{ 
     const sql = `
         SELECT * FROM users
         WHERE email = $1
     `;
 
-    const result = await query<User>(sql,[email]);
+    const result = await query<User>(db, sql,[email]);
     return result.rows[0] ?? null;
 }
 
-export async function getUserById(userId : string) : Promise<User|null> {
+export async function getUserById(db: DB, userId : string) : Promise<User|null> {
     const sql = `
         SELECT * FROM users
         WHERE user_id = $1
     `;
 
-    const result = await query<User>(sql,[userId])
+    const result = await query<User>(db, sql,[userId])
     return result.rows[0] ?? null;
 }

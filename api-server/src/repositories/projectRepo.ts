@@ -1,8 +1,8 @@
 import { type Project } from "../types/db.js";
-import { query } from "../db/query.js";
+import { type DB, query } from "../db/query.js";
 import { randomUUID } from "node:crypto";
 
-export async function createProject(userId: string, projectName: string) {
+export async function createProject(db: DB, userId: string, projectName: string) {
 
     const projectId: string = randomUUID()
 
@@ -12,11 +12,11 @@ export async function createProject(userId: string, projectName: string) {
         RETURNING *
     `;
 
-    const result = await query<Project>(sql, [projectId, projectName, userId]);
+    const result = await query<Project>(db, sql, [projectId, projectName, userId]);
     return result.rows[0];
 }
 
-export async function getAllProjectsFromUserId(userId: string) {
+export async function getAllProjectsFromUserId(db: DB, userId: string) {
     const sql = `
         SELECT * FROM projects
         WHERE user_id = $1
@@ -24,28 +24,28 @@ export async function getAllProjectsFromUserId(userId: string) {
     `
 
     // Will return the whole list of projects that the user has.
-    const result = await query<Project>(sql, [userId]);
+    const result = await query<Project>(db, sql, [userId]);
     return result.rows;
 }
 
-export async function getProjectFromProjectId(projectId: string) {
+export async function getProjectFromProjectId(db: DB, projectId: string) {
     const sql = `
         SELECT * FROM projects 
         WHERE project_id = $1;
     `
 
-    const result = await query<Project>(sql, [projectId]);
+    const result = await query<Project>(db, sql, [projectId]);
     return result.rows[0];
 }
 
-export async function deleteProject(projectId: string) {
+export async function deleteProject(db: DB, projectId: string) {
     const sql = `
         DELETE FROM projects
         WHERE project_id = $1
         RETURNING *;
     `;
 
-    const result = await query<Project>(sql, [projectId]);
+    const result = await query<Project>(db, sql, [projectId]);
     return result.rows[0];
 }
 
